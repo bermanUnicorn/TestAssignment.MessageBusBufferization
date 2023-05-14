@@ -19,4 +19,15 @@ public class BusBenchmark
         foreach (var dataPart in _dataParts)
             await writer.SendMessageAsync(dataPart);
     }
+
+    [Benchmark]
+    public async Task SemaphoreSlim()
+    {
+        var writer = new SemaphoreSlimBusMessageWriter(_busConnection);
+        await Parallel.ForEachAsync(_dataParts, new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 10
+        },
+        async (part, _) => await writer.SendMessageAsync(part));
+    }
 }
