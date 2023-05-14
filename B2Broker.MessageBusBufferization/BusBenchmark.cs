@@ -30,4 +30,16 @@ public class BusBenchmark
         },
         async (part, _) => await writer.SendMessageAsync(part));
     }
+
+    [Benchmark]
+    public async Task Channel()
+    {
+        var writer = new ChannelBusMessageWriter(_busConnection);
+        await Parallel.ForEachAsync(_dataParts, new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 10
+        },
+        async (part, _) => await writer.SendMessageAsync(part));
+        await writer.CompleteAsync();
+    }
 }
