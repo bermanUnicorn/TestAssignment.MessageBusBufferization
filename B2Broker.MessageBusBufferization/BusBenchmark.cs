@@ -32,9 +32,32 @@ public class BusBenchmark
     }
 
     [Benchmark]
+    public async Task TwoStreamSemaphoreSlim()
+    {
+        var writer = new TwoStreamSemaphoreSlimBusMessageWriter(_busConnection);
+        await Parallel.ForEachAsync(_dataParts, new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 10
+        },
+        async (part, _) => await writer.SendMessageAsync(part));
+    }
+
+    [Benchmark]
     public async Task Channel()
     {
         var writer = new ChannelBusMessageWriter(_busConnection);
+        await Parallel.ForEachAsync(_dataParts, new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 10
+        },
+        async (part, _) => await writer.SendMessageAsync(part));
+        await writer.CompleteAsync();
+    }
+
+    [Benchmark]
+    public async Task TwoStreamChannel()
+    {
+        var writer = new TwoStreamChannelBusMessageWriter(_busConnection);
         await Parallel.ForEachAsync(_dataParts, new ParallelOptions()
         {
             MaxDegreeOfParallelism = 10
